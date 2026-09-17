@@ -3,12 +3,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.116.0'
 const SUPABASE_URL='https://agkjutuvfjcahckhjkra.supabase.co'
 const SUPABASE_KEY='sb_publishable_6oA2tFA2W-yfzK6GpL4Bhw_prNXvyvd'
 const API=`${SUPABASE_URL}/functions/v1/reseller-panel-api`
-const PANEL_URL='https://espancashots.github.io/revendedor-site-/'
-const RESET_URL=`${PANEL_URL}?reset=1`
-const authParams=new URLSearchParams(location.hash.replace(/^#/,''))
-const searchParams=new URLSearchParams(location.search)
-const AUTH_FLOW=authParams.get('type')||searchParams.get('type')||''
-let passwordFlow=searchParams.get('reset')==='1'||AUTH_FLOW==='invite'||AUTH_FLOW==='recovery'
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
 const $=id=>document.getElementById(id)
 const PLAN={'3h':{label:'3 horas',price:4},'10h':{label:'10 horas',price:8},'1d':{label:'1 dia',price:14},'3d':{label:'3 dias',price:30},'1w':{label:'7 dias',price:40},'1m':{label:'1 mês',price:70}}
@@ -29,38 +23,36 @@ async function api(body){const s=await session();if(!s)throw Object.assign(new E
 async function copy(text,msg='Copiado.'){await navigator.clipboard.writeText(text);flash(msg)}
 function phoneUrl(v){let d=digits(v);if(d&&d.length<=11&&!d.startsWith('55'))d='55'+d;return d?`https://wa.me/${d}`:''}
 
-function showPasswordSetup(){
-  hide('authView');hide('appView');hide('blockedView');show('passwordView')
+function authEmailForLogin(value){
+  const login=String(value||'').trim().toLowerCase()
+  return `rv.${login}@auth.satanabe.store`
 }
 
-// Supabase sinaliza recuperacao de senha pelo evento PASSWORD_RECOVERY.
-// O redirect nem sempre preserva `type=recovery` na URL final, entao nao
-// podemos depender apenas de location.hash/location.search.
-supabase.auth.onAuthStateChange((event,authSession)=>{
-  if(event==='PASSWORD_RECOVERY'){
-    passwordFlow=true
-    showPasswordSetup()
-    return
+function configureLoginUI(){
+  const input=$('loginEmail')
+  if(input){
+    input.type='text'
+    input.autocomplete='username'
+    input.placeholder='Seu login'
+    const label=input.closest('label')?.querySelector('span')
+    if(label)label.textContent='Login'
   }
-
-  if(event==='SIGNED_IN'&&passwordFlow&&authSession){
-    showPasswordSetup()
-    return
-  }
-
-  if(event==='SIGNED_OUT'&&searchParams.get('reset')!=='1'){
-    passwordFlow=false
-  }
-})
+  const subtitle=document.querySelector('#authView .muted')
+  if(subtitle)subtitle.textContent='Entre com o login e a senha fornecidos pelo administrador.'
+  const forgot=$('forgotButton')
+  if(forgot)forgot.remove()
+  const passwordView=$('passwordView')
+  if(passwordView)passwordView.classList.add('hidden')
+}
 
 function applyPermissions(){
   document.querySelectorAll('[data-panel]').forEach(b=>{const p=b.dataset.panel;b.classList.toggle('hidden',permissions[p]===false)})
   const order=['overview','keys','clients','revenue'];if(permissions[activePanel]===false){activePanel=order.find(x=>permissions[x]!==false)||'overview'}
 }
-function setIdentity(){const r=me?.reseller||{};$('storeNameSide').textContent=r.store_name||'Reseller';$('storeNameHero').textContent=r.store_name||'Sua loja';$('storeMetaHero').textContent=[r.owner_name,r.whatsapp||r.phone].filter(Boolean).join(' • ')||r.email||'';$('ownerSide').textContent=r.owner_name||r.store_name||'Revendedor';$('emailSide').textContent=r.email||'';$('userInitial').textContent=(r.owner_name||r.store_name||'R').trim().charAt(0).toUpperCase();document.title=`${r.store_name||'Satanabe'} • Reseller`}
+function setIdentity(){const r=me?.reseller||{};$('storeNameSide').textContent=r.store_name||'Reseller';$('storeNameHero').textContent=r.store_name||'Sua loja';$('storeMetaHero').textContent=[r.owner_name,r.whatsapp||r.phone].filter(Boolean).join(' • ')||r.email||'';$('ownerSide').textContent=r.owner_name||r.store_name||'Revendedor';$('emailSide').textContent='Revendedor';$('userInitial').textContent=(r.owner_name||r.store_name||'R').trim().charAt(0).toUpperCase();document.title=`${r.store_name||'Satanabe'} • Reseller`}
 function setPanel(name){if(permissions[name]===false)return;activePanel=name;document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));$(`${name}Panel`).classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.panel===name));$('pageTitle').textContent={overview:'Overview',keys:'Keys',clients:'Clientes',revenue:'Receita'}[name]||name;$('sideNav').closest('.sidebar')?.classList.remove('open');loadPanel(name).catch(handleError)}
 async function loadPanel(name){$('syncStatus').textContent='Atualizando…';if(name==='overview')await loadOverview();if(name==='keys')await loadLicenses();if(name==='clients')await loadClients();if(name==='revenue')await loadRevenue();$('syncStatus').textContent='Atualizado'}
-function handleError(e){if(e.code==='reseller_disabled'){hide('appView');hide('authView');$('blockedTitle').textContent='Painel desativado';$('blockedMessage').textContent='O administrador desativou este revendedor. As keys existentes não são alteradas automaticamente.';show('blockedView');return}if(e.code==='reseller_not_found'||e.code==='permission_denied'){if(e.code==='permission_denied'){flash('Você não possui acesso a esta área.');return}hide('appView');hide('authView');$('blockedTitle').textContent='Conta não vinculada';$('blockedMessage').textContent='Este e-mail não está vinculado a um painel de revendedor.';show('blockedView');return}flash(e.message||'Erro inesperado.')}
+function handleError(e){if(e.code==='reseller_disabled'){hide('appView');hide('authView');$('blockedTitle').textContent='Painel desativado';$('blockedMessage').textContent='O administrador desativou este revendedor. As keys existentes não são alteradas automaticamente.';show('blockedView');return}if(e.code==='reseller_not_found'||e.code==='permission_denied'){if(e.code==='permission_denied'){flash('Você não possui acesso a esta área.');return}hide('appView');hide('authView');$('blockedTitle').textContent='Conta não vinculada';$('blockedMessage').textContent='Este login não está vinculado a um painel de revendedor.';show('blockedView');return}flash(e.message||'Erro inesperado.')}
 
 async function bootApp(){
   try{me=await api({action:'me'});permissions=me.permissions||{};setIdentity();applyPermissions();hide('authView');hide('passwordView');hide('blockedView');show('appView');setPanel(activePanel)}catch(e){handleError(e)}
@@ -79,68 +71,29 @@ function renderRevenue(){const q=norm($('revenueSearch').value);const rows=trans
 function openKeyDetail(l){selectedLicense=l;$('kdTitle').textContent=l.client?.name||l.plan||'Detalhes da key';$('kdBody').innerHTML=`<div class="detail-grid"><div class="detail-item"><span>Status</span><strong>${statusName[l.status]||l.status}</strong></div><div class="detail-item"><span>Plano</span><strong>${esc(l.plan||l.duration_label||'—')}</strong></div><div class="detail-item"><span>Cliente</span><strong>${esc(l.client?.name||'Sem cliente')}</strong></div><div class="detail-item"><span>Telefone</span><strong>${esc(l.client?.phone||'—')}</strong></div><div class="detail-item"><span>Aparelhos</span><strong>${l.device_count||0}/${l.max_devices}</strong></div><div class="detail-item"><span>Vencimento</span><strong>${l.expires_at?fmt(l.expires_at):'Não ativada'}</strong></div><div class="detail-item" style="grid-column:1/-1"><span>Key</span><strong>${esc(l.license_key||l.key_hint||'—')}</strong></div></div>`;$('kdToggle').textContent=l.status==='revoked'?'Ativar':'Desativar';$('kdToggle').className=l.status==='revoked'?'success':'danger';$('kdWhatsapp').disabled=!l.client?.phone;openModal('keyDetailModal')}
 function syncPlanPrice(selectId,inputId){const p=PLAN[$(selectId).value]||PLAN['1m'];$(inputId).value=p.price}
 
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginButton').disabled=true;$('loginError').textContent='';const {error}=await supabase.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});$('loginButton').disabled=false;if(error){$('loginError').textContent='E-mail ou senha inválidos.';return}await bootApp()})
-$('forgotButton').addEventListener('click',async()=>{
-  const email=$('loginEmail').value.trim()
-  if(!email){
-    $('loginError').textContent='Digite seu e-mail primeiro.'
-    return
-  }
-
-  $('forgotButton').disabled=true
-  $('loginError').textContent='Enviando link de recuperação…'
-
-  const {error}=await supabase.auth.resetPasswordForEmail(email,{
-    redirectTo:RESET_URL
-  })
-
-  $('forgotButton').disabled=false
-
-  if(error){
-    const msg=String(error.message||'').toLowerCase()
-    if(error.status===429||msg.includes('rate limit')||msg.includes('too many')){
-      $('loginError').textContent='Muitas solicitações foram feitas. Aguarde um pouco antes de pedir outro link.'
-    }else{
-      $('loginError').textContent='Não foi possível enviar o link de recuperação. Tente novamente.'
-    }
-    return
-  }
-
-  $('loginError').textContent='Enviamos um link para você criar uma nova senha.'
-})
-$('passwordForm').addEventListener('submit',async e=>{
+$('loginForm').addEventListener('submit',async e=>{
   e.preventDefault()
-  const a=$('newPassword').value,b=$('confirmPassword').value
-  $('passwordError').textContent=''
+  const login=$('loginEmail').value.trim().toLowerCase()
+  const password=$('loginPassword').value
+  $('loginError').textContent=''
 
-  if(a.length<8){
-    $('passwordError').textContent='Use pelo menos 8 caracteres.'
+  if(!/^[a-z0-9._-]{3,40}$/.test(login)){
+    $('loginError').textContent='Login inválido.'
     return
   }
 
-  if(a!==b){
-    $('passwordError').textContent='As senhas não coincidem.'
-    return
-  }
-
-  const currentSession=await session()
-  if(!currentSession){
-    $('passwordError').textContent='O link de recuperação expirou ou não foi validado. Solicite um novo link.'
-    return
-  }
-
-  $('passwordButton').disabled=true
-  const {error}=await supabase.auth.updateUser({password:a})
-  $('passwordButton').disabled=false
+  $('loginButton').disabled=true
+  const {error}=await supabase.auth.signInWithPassword({
+    email:authEmailForLogin(login),
+    password
+  })
+  $('loginButton').disabled=false
 
   if(error){
-    $('passwordError').textContent=error.message||'Não foi possível alterar a senha.'
+    $('loginError').textContent='Login ou senha inválidos.'
     return
   }
 
-  passwordFlow=false
-  history.replaceState({},document.title,location.pathname)
-  flash('Senha definida com sucesso.')
   await bootApp()
 })
 $('logoutButton').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});$('blockedLogout').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()})
@@ -170,6 +123,20 @@ $('renewPlan').addEventListener('change',()=>syncPlanPrice('renewPlan','renewAmo
 $('renewForm').addEventListener('submit',async e=>{e.preventDefault();if(!selectedLicense)return;try{await api({action:'renew',license_id:selectedLicense.id,duration:$('renewPlan').value,amount:$('renewAmount').value});closeModals();await Promise.all([loadLicenses(),permissions.revenue!==false?loadRevenue():Promise.resolve(),permissions.overview!==false?loadOverview():Promise.resolve()]);flash('Key renovada.')}catch(err){handleError(err)}})
 
 async function start(){
+  configureLoginUI()
+  const {data:{session:s}}=await supabase.auth.getSession()
+
+  if(!s){
+    show('authView')
+    hide('passwordView')
+    hide('appView')
+    hide('blockedView')
+    return
+  }
+
+  await bootApp()
+}
+start(){
   const {data:{session:s}}=await supabase.auth.getSession()
 
   if(passwordFlow){

@@ -1,0 +1,10 @@
+SATANABE RESELLER - LOGIN + SENHA
+
+Substitua o arquivo app.js do repositório revendedor-site- por este app.js.
+Não apague styles.css nem index.html.
+
+Mudanças:
+- Login por texto (ex.: luckycheats)
+- Senha definida no Satanabe Admin
+- Sem recuperação por e-mail
+- Remove a opção Esqueci minha senha da tela
