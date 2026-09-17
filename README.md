@@ -29,3 +29,10 @@ O backend valida o `reseller_id` em cada operação; esconder uma aba no navegad
 - Login do revendedor agora usa identificador + senha definidos pelo administrador.
 - E-mail e recuperação por e-mail removidos da tela de acesso.
 - Cache busting adicionado aos arquivos do GitHub Pages.
+
+
+## v0.1.4 Alpha
+- Nova aba **Valores** no painel do revendedor.
+- O revendedor pode definir preços padrão para 3h, 10h, 1 dia, 3 dias, 7 dias e 1 mês.
+- Esses preços são preenchidos automaticamente ao gerar e renovar keys.
+- Os valores ficam salvos no Supabase por revendedor.

@@ -1,3 +1,10 @@
+# v0.1.4 Alpha
+
+- Adicionada aba **Valores** no painel Revendedor.
+- Preços padrão configuráveis por plano.
+- Geração e renovação de keys passam a usar automaticamente os preços definidos pelo revendedor.
+- Configuração persistida no Supabase por revendedor.
+
 ## v0.1.3 Alpha
 - Troca do login por e-mail para login textual + senha.
 - Remoção de “Esqueci minha senha”.

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b0b0d" />
   <title>Satanabe Reseller</title>
-  <link rel="stylesheet" href="styles.css?v=0.1.3-alpha" />
+  <link rel="stylesheet" href="styles.css?v=0.1.4-alpha" />
 </head>
 <body>
   <div class="bg-orb orb-a"></div><div class="bg-orb orb-b"></div>
@@ -40,6 +40,7 @@
         <button class="nav-item" data-panel="keys"><span>⌘</span>Keys</button>
         <button class="nav-item" data-panel="clients"><span>◎</span>Clientes</button>
         <button class="nav-item" data-panel="revenue"><span>₿</span>Receita</button>
+        <button class="nav-item" data-panel="values"><span>R$</span>Valores</button>
       </nav>
       <div class="sidebar-foot">
         <div class="user-chip"><div class="avatar" id="userInitial">R</div><div><strong id="ownerSide">Revendedor</strong><span id="emailSide">—</span></div></div>
@@ -86,6 +87,21 @@
           <div class="stats-grid revenue-grid"><article class="stat glass revenue"><span>Receita do mês</span><strong id="revMonth">R$ 0,00</strong></article><article class="stat glass"><span>Receita total</span><strong id="revTotal">R$ 0,00</strong></article><article class="stat glass"><span>Movimentações</span><strong id="revCount">0</strong></article></div>
           <section class="glass section-card"><div class="section-head"><div><div class="eyebrow">HISTÓRICO</div><h3>Vendas e renovações</h3></div><div class="search small"><span>⌕</span><input id="revenueSearch" placeholder="Buscar cliente ou plano" /></div></div><div id="revenueList" class="list"></div><div id="revenueEmpty" class="empty">Nenhuma movimentação registrada.</div></section>
         </section>
+
+        <section id="valuesPanel" class="panel hidden">
+          <section class="glass section-card price-settings-card">
+            <div class="section-head"><div><div class="eyebrow">VALORES DAS KEYS</div><h3>Preços predefinidos</h3><p class="muted">Defina uma vez. Ao escolher um plano para gerar ou renovar uma key, o valor será preenchido automaticamente.</p></div></div>
+            <form id="priceSettingsForm" class="price-settings-grid">
+              <label><span>3 horas</span><div class="money-input"><span>R$</span><input id="price3h" type="number" min="0" max="10000" step="0.01" required /></div></label>
+              <label><span>10 horas</span><div class="money-input"><span>R$</span><input id="price10h" type="number" min="0" max="10000" step="0.01" required /></div></label>
+              <label><span>1 dia</span><div class="money-input"><span>R$</span><input id="price1d" type="number" min="0" max="10000" step="0.01" required /></div></label>
+              <label><span>3 dias</span><div class="money-input"><span>R$</span><input id="price3d" type="number" min="0" max="10000" step="0.01" required /></div></label>
+              <label><span>7 dias</span><div class="money-input"><span>R$</span><input id="price1w" type="number" min="0" max="10000" step="0.01" required /></div></label>
+              <label><span>1 mês</span><div class="money-input"><span>R$</span><input id="price1m" type="number" min="0" max="10000" step="0.01" required /></div></label>
+              <button id="savePricesButton" class="primary wide price-save" type="submit">Salvar valores</button>
+            </form>
+          </section>
+        </section>
       </main>
     </section>
   </div>
@@ -102,6 +118,6 @@
 
   <div id="renewModal" class="modal hidden"><div class="modal-card glass"><div class="modal-head"><div><div class="eyebrow">RENOVAÇÃO</div><h3>Renovar key</h3></div><button class="icon-btn close-modal" type="button">×</button></div><form id="renewForm" class="form-grid"><label class="full"><span>Plano</span><select id="renewPlan"><option value="3h">3 horas — R$ 4</option><option value="10h">10 horas — R$ 8</option><option value="1d">1 dia — R$ 14</option><option value="3d">3 dias — R$ 30</option><option value="1w">7 dias — R$ 40</option><option value="1m" selected>1 mês — R$ 70</option></select></label><label class="full"><span>Valor registrado</span><input id="renewAmount" type="number" step="0.01" min="0" /></label><button class="primary wide full" type="submit">Confirmar renovação</button></form></div></div>
 
-  <script type="module" src="app.js?v=0.1.3-alpha"></script>
+  <script type="module" src="app.js?v=0.1.4-alpha"></script>
 </body>
 </html>
