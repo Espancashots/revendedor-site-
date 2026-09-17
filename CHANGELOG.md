@@ -1,3 +1,8 @@
+## v0.1.3 Alpha
+- Troca do login por e-mail para login textual + senha.
+- Remoção de “Esqueci minha senha”.
+- Ajuste para autenticar internamente com a conta Supabase associada ao login.
+
 # Changelog
 
 ## v0.1.2 Alpha

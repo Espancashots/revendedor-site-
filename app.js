@@ -4,6 +4,7 @@ const SUPABASE_URL='https://agkjutuvfjcahckhjkra.supabase.co'
 const SUPABASE_KEY='sb_publishable_6oA2tFA2W-yfzK6GpL4Bhw_prNXvyvd'
 const API=`${SUPABASE_URL}/functions/v1/reseller-panel-api`
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
+const authEmailForLogin=login=>`rv.${String(login||'').trim().toLowerCase()}@auth.satanabe.store`
 const $=id=>document.getElementById(id)
 const PLAN={'3h':{label:'3 horas',price:4},'10h':{label:'10 horas',price:8},'1d':{label:'1 dia',price:14},'3d':{label:'3 dias',price:30},'1w':{label:'7 dias',price:40},'1m':{label:'1 mês',price:70}}
 const statusName={active:'Ativa',pending:'Pendente',expired:'Expirada',revoked:'Revogada'}
@@ -23,39 +24,17 @@ async function api(body){const s=await session();if(!s)throw Object.assign(new E
 async function copy(text,msg='Copiado.'){await navigator.clipboard.writeText(text);flash(msg)}
 function phoneUrl(v){let d=digits(v);if(d&&d.length<=11&&!d.startsWith('55'))d='55'+d;return d?`https://wa.me/${d}`:''}
 
-function authEmailForLogin(value){
-  const login=String(value||'').trim().toLowerCase()
-  return `rv.${login}@auth.satanabe.store`
-}
-
-function configureLoginUI(){
-  const input=$('loginEmail')
-  if(input){
-    input.type='text'
-    input.autocomplete='username'
-    input.placeholder='Seu login'
-    const label=input.closest('label')?.querySelector('span')
-    if(label)label.textContent='Login'
-  }
-  const subtitle=document.querySelector('#authView .muted')
-  if(subtitle)subtitle.textContent='Entre com o login e a senha fornecidos pelo administrador.'
-  const forgot=$('forgotButton')
-  if(forgot)forgot.remove()
-  const passwordView=$('passwordView')
-  if(passwordView)passwordView.classList.add('hidden')
-}
-
 function applyPermissions(){
   document.querySelectorAll('[data-panel]').forEach(b=>{const p=b.dataset.panel;b.classList.toggle('hidden',permissions[p]===false)})
   const order=['overview','keys','clients','revenue'];if(permissions[activePanel]===false){activePanel=order.find(x=>permissions[x]!==false)||'overview'}
 }
-function setIdentity(){const r=me?.reseller||{};$('storeNameSide').textContent=r.store_name||'Reseller';$('storeNameHero').textContent=r.store_name||'Sua loja';$('storeMetaHero').textContent=[r.owner_name,r.whatsapp||r.phone].filter(Boolean).join(' • ')||r.email||'';$('ownerSide').textContent=r.owner_name||r.store_name||'Revendedor';$('emailSide').textContent='Revendedor';$('userInitial').textContent=(r.owner_name||r.store_name||'R').trim().charAt(0).toUpperCase();document.title=`${r.store_name||'Satanabe'} • Reseller`}
+function setIdentity(){const r=me?.reseller||{};$('storeNameSide').textContent=r.store_name||'Reseller';$('storeNameHero').textContent=r.store_name||'Sua loja';$('storeMetaHero').textContent=[r.owner_name,r.whatsapp||r.phone].filter(Boolean).join(' • ')||'';$('ownerSide').textContent=r.owner_name||r.store_name||'Revendedor';$('emailSide').textContent=r.slug?`@${r.slug}`:'Painel revendedor';$('userInitial').textContent=(r.owner_name||r.store_name||'R').trim().charAt(0).toUpperCase();document.title=`${r.store_name||'Satanabe'} • Reseller`}
 function setPanel(name){if(permissions[name]===false)return;activePanel=name;document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));$(`${name}Panel`).classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.panel===name));$('pageTitle').textContent={overview:'Overview',keys:'Keys',clients:'Clientes',revenue:'Receita'}[name]||name;$('sideNav').closest('.sidebar')?.classList.remove('open');loadPanel(name).catch(handleError)}
 async function loadPanel(name){$('syncStatus').textContent='Atualizando…';if(name==='overview')await loadOverview();if(name==='keys')await loadLicenses();if(name==='clients')await loadClients();if(name==='revenue')await loadRevenue();$('syncStatus').textContent='Atualizado'}
 function handleError(e){if(e.code==='reseller_disabled'){hide('appView');hide('authView');$('blockedTitle').textContent='Painel desativado';$('blockedMessage').textContent='O administrador desativou este revendedor. As keys existentes não são alteradas automaticamente.';show('blockedView');return}if(e.code==='reseller_not_found'||e.code==='permission_denied'){if(e.code==='permission_denied'){flash('Você não possui acesso a esta área.');return}hide('appView');hide('authView');$('blockedTitle').textContent='Conta não vinculada';$('blockedMessage').textContent='Este login não está vinculado a um painel de revendedor.';show('blockedView');return}flash(e.message||'Erro inesperado.')}
 
 async function bootApp(){
-  try{me=await api({action:'me'});permissions=me.permissions||{};setIdentity();applyPermissions();hide('authView');hide('passwordView');hide('blockedView');show('appView');setPanel(activePanel)}catch(e){handleError(e)}
+  try{me=await api({action:'me'});permissions=me.permissions||{};setIdentity();applyPermissions();hide('authView');hide('blockedView');show('appView');setPanel(activePanel)}catch(e){handleError(e)}
 }
 async function loadOverview(){const d=await api({action:'overview'});overview=d;const s=d.stats||{};$('ovActive').textContent=s.active_keys||0;$('ovToday').textContent=s.expires_today||0;$('ovTomorrow').textContent=s.expires_tomorrow||0;$('ov3d').textContent=s.expires_3d||0;$('ovDevices').textContent=s.devices||0;$('ovClients').textContent=s.clients||0;$('ovPending').textContent=s.pending_keys||0;$('ovExpired').textContent=s.expired_keys||0;$('ovRevoked').textContent=s.revoked_keys||0;$('heroRevenue').textContent=money(s.month_revenue);$('ovTotalRevenue').textContent=money(s.total_revenue);renderAlerts()}
 function renderAlerts(){const rows=overview?.alerts||[];$('alertEmpty').classList.toggle('hidden',rows.length>0);$('alertList').innerHTML=rows.map(l=>{const c=l.client||{};return`<div class="list-row"><div class="main"><strong>${esc(c.name||l.plan||l.duration_label||'Key')}</strong><small>${esc(c.phone||l.key_hint||'')}</small></div><div><strong>${fmt(l.expires_at)}</strong></div></div>`}).join('')}
@@ -73,7 +52,7 @@ function syncPlanPrice(selectId,inputId){const p=PLAN[$(selectId).value]||PLAN['
 
 $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault()
-  const login=$('loginEmail').value.trim().toLowerCase()
+  const login=$('loginId').value.trim().toLowerCase()
   const password=$('loginPassword').value
   $('loginError').textContent=''
 
@@ -83,11 +62,15 @@ $('loginForm').addEventListener('submit',async e=>{
   }
 
   $('loginButton').disabled=true
+  $('loginButton').textContent='Entrando…'
+
   const {error}=await supabase.auth.signInWithPassword({
     email:authEmailForLogin(login),
     password
   })
+
   $('loginButton').disabled=false
+  $('loginButton').textContent='Entrar'
 
   if(error){
     $('loginError').textContent='Login ou senha inválidos.'
@@ -123,47 +106,13 @@ $('renewPlan').addEventListener('change',()=>syncPlanPrice('renewPlan','renewAmo
 $('renewForm').addEventListener('submit',async e=>{e.preventDefault();if(!selectedLicense)return;try{await api({action:'renew',license_id:selectedLicense.id,duration:$('renewPlan').value,amount:$('renewAmount').value});closeModals();await Promise.all([loadLicenses(),permissions.revenue!==false?loadRevenue():Promise.resolve(),permissions.overview!==false?loadOverview():Promise.resolve()]);flash('Key renovada.')}catch(err){handleError(err)}})
 
 async function start(){
-  configureLoginUI()
   const {data:{session:s}}=await supabase.auth.getSession()
-
   if(!s){
     show('authView')
-    hide('passwordView')
     hide('appView')
     hide('blockedView')
     return
   }
-
-  await bootApp()
-}
-start(){
-  const {data:{session:s}}=await supabase.auth.getSession()
-
-  if(passwordFlow){
-    if(s){
-      showPasswordSetup()
-      return
-    }
-
-    // Em links de recuperação o Supabase pode levar um instante para
-    // transformar os dados da URL em uma sessão. O listener acima assume
-    // assim que PASSWORD_RECOVERY/SIGNED_IN for disparado.
-    hide('appView')
-    hide('blockedView')
-    show('authView')
-    hide('passwordView')
-    $('loginError').textContent='Validando link de recuperação…'
-    return
-  }
-
-  if(!s){
-    show('authView')
-    hide('passwordView')
-    hide('appView')
-    hide('blockedView')
-    return
-  }
-
   await bootApp()
 }
 start()

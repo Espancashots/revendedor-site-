@@ -23,3 +23,9 @@ Isso permite que convites e recuperação de senha retornem ao painel.
 - Criação, renovação, ativação/desativação, reset de aparelhos e limite de dispositivos de suas próprias keys.
 
 O backend valida o `reseller_id` em cada operação; esconder uma aba no navegador não é usado como mecanismo de segurança.
+
+
+## v0.1.3 Alpha
+- Login do revendedor agora usa identificador + senha definidos pelo administrador.
+- E-mail e recuperação por e-mail removidos da tela de acesso.
+- Cache busting adicionado aos arquivos do GitHub Pages.
