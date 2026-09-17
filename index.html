@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0d" />
+  <title>Satanabe Reseller</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-orb orb-a"></div><div class="bg-orb orb-b"></div>
+
+  <main id="authView" class="auth-shell">
+    <section class="auth-card glass">
+      <div class="brand-lockup"><div class="brand-mark">S</div><div><div class="eyebrow">SATANABE</div><h1>Reseller</h1></div></div>
+      <p class="muted">Entre com o e-mail cadastrado pelo administrador.</p>
+      <form id="loginForm" class="stack">
+        <label><span>E-mail</span><input id="loginEmail" type="email" autocomplete="email" required placeholder="seu@email.com" /></label>
+        <label><span>Senha</span><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••" /></label>
+        <button id="loginButton" class="primary wide" type="submit">Entrar</button>
+        <button id="forgotButton" class="link-button" type="button">Esqueci minha senha</button>
+        <div id="loginError" class="form-error"></div>
+      </form>
+    </section>
+  </main>
+
+  <main id="passwordView" class="auth-shell hidden">
+    <section class="auth-card glass">
+      <div class="brand-lockup"><div class="brand-mark">S</div><div><div class="eyebrow">PRIMEIRO ACESSO</div><h1>Defina sua senha</h1></div></div>
+      <p class="muted">Crie uma senha para acessar seu painel de revendedor.</p>
+      <form id="passwordForm" class="stack">
+        <label><span>Nova senha</span><input id="newPassword" type="password" minlength="8" required placeholder="Mínimo 8 caracteres" /></label>
+        <label><span>Confirmar senha</span><input id="confirmPassword" type="password" minlength="8" required placeholder="Repita a senha" /></label>
+        <button id="passwordButton" class="primary wide" type="submit">Salvar senha</button>
+        <div id="passwordError" class="form-error"></div>
+      </form>
+    </section>
+  </main>
+
+  <main id="blockedView" class="auth-shell hidden">
+    <section class="auth-card glass center">
+      <div class="brand-mark danger-mark">!</div>
+      <h1 id="blockedTitle">Acesso indisponível</h1>
+      <p id="blockedMessage" class="muted">Seu acesso não está disponível no momento.</p>
+      <button id="blockedLogout" class="secondary wide" type="button">Sair</button>
+    </section>
+  </main>
+
+  <div id="appView" class="app hidden">
+    <aside class="sidebar glass">
+      <div class="brand-lockup sidebar-brand"><div class="brand-mark">S</div><div><div class="eyebrow">SATANABE</div><strong id="storeNameSide">Reseller</strong></div></div>
+      <nav id="sideNav" class="nav-list">
+        <button class="nav-item active" data-panel="overview"><span>◈</span>Overview</button>
+        <button class="nav-item" data-panel="keys"><span>⌘</span>Keys</button>
+        <button class="nav-item" data-panel="clients"><span>◎</span>Clientes</button>
+        <button class="nav-item" data-panel="revenue"><span>₿</span>Receita</button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="user-chip"><div class="avatar" id="userInitial">R</div><div><strong id="ownerSide">Revendedor</strong><span id="emailSide">—</span></div></div>
+        <button id="logoutButton" class="ghost wide" type="button">Sair</button>
+      </div>
+    </aside>
+
+    <section class="content-shell">
+      <header class="topbar glass">
+        <button id="mobileMenu" class="icon-btn" type="button">☰</button>
+        <div><div class="eyebrow">PAINEL DO REVENDEDOR</div><h2 id="pageTitle">Overview</h2></div>
+        <div class="top-actions"><span id="syncStatus" class="sync-dot">Atualizado</span><button id="refreshButton" class="secondary compact" type="button">Atualizar</button></div>
+      </header>
+
+      <main class="workspace">
+        <section id="overviewPanel" class="panel">
+          <div class="hero-strip glass"><div><div class="eyebrow">SUA LOJA</div><h1 id="storeNameHero">—</h1><p id="storeMetaHero" class="muted">—</p></div><div class="hero-revenue"><span>Receita do mês</span><strong id="heroRevenue">R$ 0,00</strong></div></div>
+          <div class="stats-grid">
+            <article class="stat glass"><span>Keys ativas</span><strong id="ovActive">0</strong></article>
+            <article class="stat glass warn"><span>Vencem hoje</span><strong id="ovToday">0</strong></article>
+            <article class="stat glass warn"><span>Vencem amanhã</span><strong id="ovTomorrow">0</strong></article>
+            <article class="stat glass"><span>Vencem em 3 dias</span><strong id="ov3d">0</strong></article>
+            <article class="stat glass"><span>Aparelhos</span><strong id="ovDevices">0</strong></article>
+            <article class="stat glass"><span>Clientes</span><strong id="ovClients">0</strong></article>
+          </div>
+          <div class="two-col">
+            <section class="glass section-card"><div class="section-head"><div><div class="eyebrow">VENCIMENTOS</div><h3>Próximas cobranças</h3></div></div><div id="alertList" class="list"></div><div id="alertEmpty" class="empty">Nenhuma key vencendo nos próximos dias.</div></section>
+            <section class="glass section-card"><div class="section-head"><div><div class="eyebrow">RESUMO</div><h3>Situação das keys</h3></div></div><div class="mini-stats"><div><span>Pendentes</span><strong id="ovPending">0</strong></div><div><span>Expiradas</span><strong id="ovExpired">0</strong></div><div><span>Revogadas</span><strong id="ovRevoked">0</strong></div><div><span>Receita total</span><strong id="ovTotalRevenue">R$ 0,00</strong></div></div></section>
+          </div>
+        </section>
+
+        <section id="keysPanel" class="panel hidden">
+          <section class="toolbar glass"><div class="search"><span>⌕</span><input id="keySearch" placeholder="Buscar key, cliente ou telefone" /></div><div class="toolbar-actions"><select id="keyFilter"><option value="all">Todas</option><option value="active">Ativas</option><option value="pending">Pendentes</option><option value="expired">Expiradas</option><option value="revoked">Revogadas</option></select><button id="createKeyButton" class="primary" type="button">+ Criar key</button></div></section>
+          <div class="status-row"><span id="keyCount">0 keys</span></div>
+          <div id="keyList" class="card-list"></div><div id="keyEmpty" class="empty glass">Nenhuma key encontrada.</div>
+        </section>
+
+        <section id="clientsPanel" class="panel hidden">
+          <section class="toolbar glass"><div class="search"><span>⌕</span><input id="clientSearch" placeholder="Buscar cliente por nome ou telefone" /></div><button id="createClientButton" class="primary" type="button">+ Novo cliente</button></section>
+          <div id="clientList" class="client-grid"></div><div id="clientEmpty" class="empty glass">Nenhum cliente encontrado.</div>
+        </section>
+
+        <section id="revenuePanel" class="panel hidden">
+          <div class="stats-grid revenue-grid"><article class="stat glass revenue"><span>Receita do mês</span><strong id="revMonth">R$ 0,00</strong></article><article class="stat glass"><span>Receita total</span><strong id="revTotal">R$ 0,00</strong></article><article class="stat glass"><span>Movimentações</span><strong id="revCount">0</strong></article></div>
+          <section class="glass section-card"><div class="section-head"><div><div class="eyebrow">HISTÓRICO</div><h3>Vendas e renovações</h3></div><div class="search small"><span>⌕</span><input id="revenueSearch" placeholder="Buscar cliente ou plano" /></div></div><div id="revenueList" class="list"></div><div id="revenueEmpty" class="empty">Nenhuma movimentação registrada.</div></section>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <div id="flash" class="flash hidden"></div>
+
+  <div id="createClientModal" class="modal hidden"><div class="modal-card glass"><div class="modal-head"><div><div class="eyebrow">CLIENTE</div><h3>Novo cliente</h3></div><button class="icon-btn close-modal" type="button">×</button></div><form id="createClientForm" class="form-grid"><label class="full"><span>Nome</span><input id="clientName" required maxlength="120" /></label><label class="full"><span>Telefone / WhatsApp</span><input id="clientPhone" inputmode="tel" maxlength="40" placeholder="21999999999" /></label><button class="primary wide full" type="submit">Criar cliente</button></form></div></div>
+
+  <div id="createKeyModal" class="modal hidden"><div class="modal-card glass large"><div class="modal-head"><div><div class="eyebrow">KEY</div><h3>Criar key</h3></div><button class="icon-btn close-modal" type="button">×</button></div><form id="createKeyForm" class="form-grid"><label><span>Plano</span><select id="createPlan"><option value="3h">3 horas — R$ 4</option><option value="10h">10 horas — R$ 8</option><option value="1d">1 dia — R$ 14</option><option value="3d">3 dias — R$ 30</option><option value="1w">7 dias — R$ 40</option><option value="1m" selected>1 mês — R$ 70</option></select></label><label><span>Valor registrado</span><input id="createPrice" type="number" step="0.01" min="0" /></label><label class="full"><span>Cliente</span><select id="createClient"><option value="">Sem cliente</option></select></label><label><span>Aparelhos por key</span><input id="createDevices" type="number" min="1" max="20" value="1" /></label><label><span>Quantidade</span><input id="createQuantity" type="number" min="1" max="100" value="1" /></label><label class="full"><span>Observação</span><input id="createNote" maxlength="200" placeholder="Opcional" /></label><button id="submitCreateKey" class="primary wide full" type="submit">Gerar key(s)</button></form></div></div>
+
+  <div id="keyResultModal" class="modal hidden"><div class="modal-card glass"><div class="modal-head"><div><div class="eyebrow">CRIADAS</div><h3>Keys geradas</h3></div><button class="icon-btn close-modal" type="button">×</button></div><textarea id="keyResult" class="result-box" readonly></textarea><button id="copyAllKeys" class="primary wide" type="button">Copiar todas</button></div></div>
+
+  <div id="keyDetailModal" class="modal hidden"><div class="modal-card glass large"><div class="modal-head"><div><div class="eyebrow">KEY</div><h3 id="kdTitle">Detalhes</h3></div><button class="icon-btn close-modal" type="button">×</button></div><div id="kdBody"></div><div class="action-grid"><button id="kdCopy" class="secondary" type="button">Copiar key</button><button id="kdWhatsapp" class="secondary" type="button">WhatsApp</button><button id="kdReset" class="secondary" type="button">Resetar aparelhos</button><button id="kdDevices" class="secondary" type="button">Alterar aparelhos</button><button id="kdRenew" class="primary" type="button">Renovar</button><button id="kdToggle" class="danger" type="button">Desativar</button></div></div></div>
+
+  <div id="renewModal" class="modal hidden"><div class="modal-card glass"><div class="modal-head"><div><div class="eyebrow">RENOVAÇÃO</div><h3>Renovar key</h3></div><button class="icon-btn close-modal" type="button">×</button></div><form id="renewForm" class="form-grid"><label class="full"><span>Plano</span><select id="renewPlan"><option value="3h">3 horas — R$ 4</option><option value="10h">10 horas — R$ 8</option><option value="1d">1 dia — R$ 14</option><option value="3d">3 dias — R$ 30</option><option value="1w">7 dias — R$ 40</option><option value="1m" selected>1 mês — R$ 70</option></select></label><label class="full"><span>Valor registrado</span><input id="renewAmount" type="number" step="0.01" min="0" /></label><button class="primary wide full" type="submit">Confirmar renovação</button></form></div></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
