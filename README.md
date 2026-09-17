@@ -23,10 +23,3 @@ Isso permite que convites e recuperação de senha retornem ao painel.
 - Criação, renovação, ativação/desativação, reset de aparelhos e limite de dispositivos de suas próprias keys.
 
 O backend valida o `reseller_id` em cada operação; esconder uma aba no navegador não é usado como mecanismo de segurança.
-
-
-## Convites por e-mail
-
-Para o Supabase enviar convites automaticamente a endereços que não pertencem à equipe do projeto, configure um SMTP próprio em **Authentication → SMTP Settings**.
-
-Sem SMTP próprio, o Satanabe Admin usa um fallback: gera um link seguro de convite/recuperação para o administrador copiar e enviar ao revendedor por WhatsApp.

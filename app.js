@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.116.0'
 const SUPABASE_URL='https://agkjutuvfjcahckhjkra.supabase.co'
 const SUPABASE_KEY='sb_publishable_6oA2tFA2W-yfzK6GpL4Bhw_prNXvyvd'
 const API=`${SUPABASE_URL}/functions/v1/reseller-panel-api`
-const PANEL_URL='https://espancashots.github.io/satanabe-reseller/'
+const PANEL_URL='https://espancashots.github.io/revendedor-site-/'
 const authParams=new URLSearchParams(location.hash.replace(/^#/,''));
 const searchParams=new URLSearchParams(location.search)
 const AUTH_FLOW=authParams.get('type')||searchParams.get('type')||''
