@@ -7,9 +7,10 @@ const PANEL_URL='https://espancashots.github.io/revendedor-site-/'
 const authParams=new URLSearchParams(location.hash.replace(/^#/,''));
 const searchParams=new URLSearchParams(location.search)
 const AUTH_FLOW=authParams.get('type')||searchParams.get('type')||''
+let passwordFlow=AUTH_FLOW==='invite'||AUTH_FLOW==='recovery'
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY)
 const $=id=>document.getElementById(id)
-const PLAN={3h:{label:'3 horas',price:4},10h:{label:'10 horas',price:8},1d:{label:'1 dia',price:14},3d:{label:'3 dias',price:30},1w:{label:'7 dias',price:40},1m:{label:'1 mês',price:70}}
+const PLAN={'3h':{label:'3 horas',price:4},'10h':{label:'10 horas',price:8},'1d':{label:'1 dia',price:14},'3d':{label:'3 dias',price:30},'1w':{label:'7 dias',price:40},'1m':{label:'1 mês',price:70}}
 const statusName={active:'Ativa',pending:'Pendente',expired:'Expirada',revoked:'Revogada'}
 let me=null,permissions={},overview=null,licenses=[],clients=[],transactions=[],selectedLicense=null,activePanel='overview'
 
@@ -26,6 +27,21 @@ async function session(){return (await supabase.auth.getSession()).data.session}
 async function api(body){const s=await session();if(!s)throw Object.assign(new Error('Sessão expirada.'),{code:'unauthorized'});const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':`Bearer ${s.access_token}`},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(d.detail||d.error||`Erro ${r.status}`);e.code=d.error;e.data=d;throw e}return d}
 async function copy(text,msg='Copiado.'){await navigator.clipboard.writeText(text);flash(msg)}
 function phoneUrl(v){let d=digits(v);if(d&&d.length<=11&&!d.startsWith('55'))d='55'+d;return d?`https://wa.me/${d}`:''}
+
+function showPasswordSetup(){
+  hide('authView');hide('appView');hide('blockedView');show('passwordView')
+}
+
+// Supabase sinaliza recuperacao de senha pelo evento PASSWORD_RECOVERY.
+// O redirect nem sempre preserva `type=recovery` na URL final, entao nao
+// podemos depender apenas de location.hash/location.search.
+supabase.auth.onAuthStateChange((event)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    passwordFlow=true
+    showPasswordSetup()
+  }
+  if(event==='SIGNED_OUT') passwordFlow=false
+})
 
 function applyPermissions(){
   document.querySelectorAll('[data-panel]').forEach(b=>{const p=b.dataset.panel;b.classList.toggle('hidden',permissions[p]===false)})
@@ -55,7 +71,7 @@ function syncPlanPrice(selectId,inputId){const p=PLAN[$(selectId).value]||PLAN['
 
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('loginButton').disabled=true;$('loginError').textContent='';const {error}=await supabase.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});$('loginButton').disabled=false;if(error){$('loginError').textContent='E-mail ou senha inválidos.';return}await bootApp()})
 $('forgotButton').addEventListener('click',async()=>{const email=$('loginEmail').value.trim();if(!email){$('loginError').textContent='Digite seu e-mail primeiro.';return}const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:PANEL_URL});$('loginError').textContent=error?error.message:'Enviamos um link para definir uma nova senha.'})
-$('passwordForm').addEventListener('submit',async e=>{e.preventDefault();const a=$('newPassword').value,b=$('confirmPassword').value;$('passwordError').textContent='';if(a.length<8){$('passwordError').textContent='Use pelo menos 8 caracteres.';return}if(a!==b){$('passwordError').textContent='As senhas não coincidem.';return}$('passwordButton').disabled=true;const {error}=await supabase.auth.updateUser({password:a});$('passwordButton').disabled=false;if(error){$('passwordError').textContent=error.message;return}history.replaceState({},document.title,location.pathname);flash('Senha definida com sucesso.');await bootApp()})
+$('passwordForm').addEventListener('submit',async e=>{e.preventDefault();const a=$('newPassword').value,b=$('confirmPassword').value;$('passwordError').textContent='';if(a.length<8){$('passwordError').textContent='Use pelo menos 8 caracteres.';return}if(a!==b){$('passwordError').textContent='As senhas não coincidem.';return}$('passwordButton').disabled=true;const {error}=await supabase.auth.updateUser({password:a});$('passwordButton').disabled=false;if(error){$('passwordError').textContent=error.message;return}passwordFlow=false;history.replaceState({},document.title,location.pathname);flash('Senha definida com sucesso.');await bootApp()})
 $('logoutButton').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()});$('blockedLogout').addEventListener('click',async()=>{await supabase.auth.signOut();location.reload()})
 
 document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>setPanel(b.dataset.panel)))
@@ -84,8 +100,8 @@ $('renewForm').addEventListener('submit',async e=>{e.preventDefault();if(!select
 
 async function start(){
   const {data:{session:s}}=await supabase.auth.getSession();
+  if(passwordFlow&&s){showPasswordSetup();return}
   if(!s){show('authView');hide('passwordView');hide('appView');return}
-  if(AUTH_FLOW==='invite'||AUTH_FLOW==='recovery'){hide('authView');show('passwordView');return}
   await bootApp()
 }
 start()
